@@ -16,8 +16,9 @@ A2 Hosting Lamp is a provisioning script intended for development use. It allows
 
 
 ## Screenshot 
-
-![Screenshot](screenshot.pngraw=true "Screenshot")
+<p align="center">
+  <img src="screenshot.png" width="350" title="Screenshot">
+</p>
 
 ## Installation
 
