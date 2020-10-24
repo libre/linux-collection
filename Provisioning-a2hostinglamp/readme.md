@@ -17,7 +17,7 @@ A2 Hosting Lamp is a provisioning script intended for development use. It allows
 
 ## Screenshot 
 
-![Screenshot](screenshot.png)
+![Screenshot](screenshot.pngraw=true "Screenshot")
 
 ## Installation
 
@@ -32,6 +32,7 @@ chown +x /usr/local/sbin/prov_a2hostinglamp.sh
 ```
 
 ## Usage
+
 
 ```
 Usage: prov_a2hostinglamp.sh -domain exemple.com -name exemple -db yes -wordpress full -debug 0
@@ -59,4 +60,5 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 Please make sure to update tests as appropriate.
 
 ## License
+
 [GPLv3](https://www.gnu.org/licenses/gpl-3.0.html)
