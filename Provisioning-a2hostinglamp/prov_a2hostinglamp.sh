@@ -322,6 +322,8 @@ provdir() {
                 chmod +755 -R $DIRECTORYWEB/backup
                 chown -R $NAME. $DIRECTORYWEB/web
                 chown -R $NAME. $DIRECTORYWEB/log
+				FTPPASS=`tr -cd '[:alnum:]' < /dev/urandom | fold -w14 | head -n1`
+				echo -e "$FTPPASS\n$FTPPASS" | (passwd ${NAME})
                 find $DIRECTORYWEB/web -type f -exec chmod 644 {} +
                 find $DIRECTORYWEB/web -type d -exec chmod 755 {} +
         echo -e "\e[96m[ $DATELOG ]\e[39m Directory for website \e[92m Created" $RETURNSCREEN				
@@ -594,6 +596,9 @@ echo -e "\e[39m	Date                 : $DATELOG"
 echo -e "\e[39m	Site Name            : $NAME"
 echo -e "\e[39m	Domain               : $DOMAIN"
 echo -e "\e[39m	Folder Web           : $DIRECTORYWEB"
+echo -e "\e[39m	"
+echo -e "\e[39m	FTP USER             : $NAME"
+echo -e "\e[39m	FTP Password         : $FTPPASS"
 echo -e "\e[39m	"
 echo -e "\e[39m	DB Provisioning      : $DB"
 echo -e "\e[39m	DB Name              : $DBNAME"
