@@ -70,7 +70,15 @@ init() {
 			echo -e "\e[96m[ $DATELOG ]\e[39m Please run as root \e[91mAborting."
 			exit
 		fi
-
+		light_red='\e[1;91m%s\e[0m\n'                     
+		light_green='\e[1;92m%s\e[0m\n'                   
+		testping = `ping -c 2 -q wordpress.com`
+		if [ "$testping" -eq 0 ]; then                           
+		  echo -e "\e[1;92m%s\e[0m\n [ CONNECTION AVAILABLE ]" >&2; 
+		else                                              
+		  echo -e "\e[96m[ $DATELOG ]\e[1;91m%s\e[0m\n DNS Or network not work \e[91mAborting." >&2; 
+		  exit 1;		  
+		fi
         # Check command exist.
         command -v apache2 >/dev/null 2>&1 || { echo -e "\e[96m[ $DATELOG ]\e[39m I require apache2 but it's not installed.  \e[91mAborting." >&2; exit 1; }
         command -v a2ensite >/dev/null 2>&1 || { echo -e "\e[96m[ $DATELOG ]\e[39m I require a2ensite but it's not installed.  \e[91mAborting." >&2; exit 1; }
@@ -312,11 +320,10 @@ provdir() {
         DIRECTORYWEB="$ROOTWWW/$NAME"
         echo -e "\e[96m[ $DATELOG ]\e[39m Provisioning directory for website \e[32m Wait" $RETURNSCREEN
         if [ ! -d "$DIRECTORYWEB" ] ; then
-                useradd -s /bin/bash -m -d /home/$NAME
+                useradd -s /bin/bash -m -d /home/$NAME $NAME
 				usermod -a -G $NAME www-data
 				mkdir "$DIRECTORYWEB" ;
                 mkdir -m o-rwx "$DIRECTORYWEB/web";
-                chmod -m o-rwx $DIRECTORYWEB/web
                 mkdir -m o-rwx "$DIRECTORYWEB/log";
                 mkdir -m o-rwx "$DIRECTORYWEB/backup";
                 chmod +755 -R $DIRECTORYWEB/backup
@@ -435,7 +442,7 @@ fixpermwp() {
 	echo -e "\e[96m[ $DATELOG ]\e[39m Check Permissions WP \e[32m Wait" $RETURNSCREEN
 	DIRECTORYWEB="$ROOTWWW/$NAME/web"
 	cd $DIRECTORYWEB
-	WP_ROOT=`echo $NAME`  # &lt;-- wordpress root directory
+	WP_ROOT=`echo $DIRECTORYWEB`  # &lt;-- wordpress root directory
 	WS_GROUP=`echo $NAME` # &lt;-- webserver group
 	WP_OWNER=`echo $NAME` # &lt;-- wordpress owner
 	#I add this condition because if the folder does not exist, you completely block your system until you can no longer start.! 
