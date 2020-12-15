@@ -22,10 +22,6 @@ IP=`ip address show | grep inet | grep global | awk '{ print $2 }' | awk -F '/' 
 ROOTMYSQL='root'
 # Obfusqued Password. encode pwd root db base64. 
 PWDENCRYPTEDMYSQL='ZGVtbw=='
-WS_GROUP=www-data # &lt;-- webserver group
-WP_OWNER=www-data # &lt;-- wordpress owner
-WP_GROUP=www-data # &lt;-- wordpress group
-
 ## Template Vhost.
 #
 #
@@ -40,6 +36,7 @@ vhost_template() {
         echo -e "                SSLEngine on" >> $VHOSTAPACHE
         echo -e "                SSLCertificateFile      /etc/ssl/certs/ssl-cert-snakeoil.pem" >> $VHOSTAPACHE
         echo -e "                SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key" >> $VHOSTAPACHE
+		echo -e "                AssignUserID $NAME $NAME" >> $VHOSTAPACHE
         echo -e "                <FilesMatch \"\.(cgi|shtml|phtml|php)$\">" >> $VHOSTAPACHE
         echo -e "                                SSLOptions +StdEnvVars" >> $VHOSTAPACHE
         echo -e "                </FilesMatch>" >> $VHOSTAPACHE
@@ -100,7 +97,19 @@ init() {
 				/etc/init.d/apache2 reload
 				echo -e "\e[96m[ $DATELOG ]\e[39m Self Signed SSL 443 \e[92m Actived"
 		fi
-
+		check_ssl=`apachectl -M | grep itk  | wc -l`		
+		if [ "$check_ssl" -eq 0 ]; then
+				echo -e "\e[96m[ $DATELOG ]\e[39m Mode ITK is not actived, let me active... \e[93m Wait"
+				echo -e "\e[96m[ $DATELOG ]\e[39m ITK  \e[93m Wait"
+				a2enmod mpm_itk
+				/etc/init.d/apache2 reload
+				echo -e "\e[96m[ $DATELOG ]\e[39m ITK \e[92m Actived"
+				check_ssl=`apachectl -M | grep itk  | wc -l`
+				if [ "$check_ssl" -eq 0 ]; then
+					echo -e "[ $DATELOG ]\e[39m ITK Its require  but it's not installed.  \e[91mAborting." >&2;
+					exit 1;
+				fi
+		fi		
         command -v mysql >/dev/null 2>&1 || { echo -e "[ $DATELOG ] I require mysql it's not installed.  \e[91mAborting." >&2; exit 1; }
         command -v wp >/dev/null 2>&1 || { echo -e "[ $DATELOG ]\e[39m I require wp it's not installed.  \e[91mAborting." >&2; exit 1; }
         command -v curl >/dev/null 2>&1 || { echo -e "[ $DATELOG ]\e[39m I require curl but it's not installed.  \e[91mAborting." >&2; exit 1; }
@@ -303,13 +312,16 @@ provdir() {
         DIRECTORYWEB="$ROOTWWW/$NAME"
         echo -e "\e[96m[ $DATELOG ]\e[39m Provisioning directory for website \e[32m Wait" $RETURNSCREEN
         if [ ! -d "$DIRECTORYWEB" ] ; then
-                mkdir "$DIRECTORYWEB" ;
-                mkdir "$DIRECTORYWEB/web" ;
-                chmod +755 -R $DIRECTORYWEB/web
-                mkdir "$DIRECTORYWEB/log" ;
-                mkdir "$DIRECTORYWEB/backup" ;
+                useradd -s /bin/bash -m -d /home/$NAME
+				usermod -a -G $NAME www-data
+				mkdir "$DIRECTORYWEB" ;
+                mkdir -m o-rwx "$DIRECTORYWEB/web";
+                chmod -m o-rwx $DIRECTORYWEB/web
+                mkdir -m o-rwx "$DIRECTORYWEB/log";
+                mkdir -m o-rwx "$DIRECTORYWEB/backup";
                 chmod +755 -R $DIRECTORYWEB/backup
-                chown -R www-data. $DIRECTORYWEB/web
+                chown -R $NAME. $DIRECTORYWEB/web
+                chown -R $NAME. $DIRECTORYWEB/log
                 find $DIRECTORYWEB/web -type f -exec chmod 644 {} +
                 find $DIRECTORYWEB/web -type d -exec chmod 755 {} +
         echo -e "\e[96m[ $DATELOG ]\e[39m Directory for website \e[92m Created" $RETURNSCREEN				
@@ -421,7 +433,9 @@ fixpermwp() {
 	echo -e "\e[96m[ $DATELOG ]\e[39m Check Permissions WP \e[32m Wait" $RETURNSCREEN
 	DIRECTORYWEB="$ROOTWWW/$NAME/web"
 	cd $DIRECTORYWEB
-	WP_ROOT=`echo $DIRECTORYWEB`  # &lt;-- wordpress root directory
+	WP_ROOT=`echo $NAME`  # &lt;-- wordpress root directory
+	WS_GROUP=`echo $NAME` # &lt;-- webserver group
+	WP_OWNER=`echo $NAME` # &lt;-- wordpress owner
 	#I add this condition because if the folder does not exist, you completely block your system until you can no longer start.! 
 	#I wanted to share the experience with you because I had the case with a cron job which blocked a system because the folder no longer existed ....
 	if [ ! -d ${WP_ROOT} ]; then 
