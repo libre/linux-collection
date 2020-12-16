@@ -36,6 +36,9 @@ vhost_template() {
         echo -e "                SSLEngine on" >> $VHOSTAPACHE
         echo -e "                SSLCertificateFile      /etc/ssl/certs/ssl-cert-snakeoil.pem" >> $VHOSTAPACHE
         echo -e "                SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key" >> $VHOSTAPACHE
+		if [ ${apachemultiuser} -eq 1 ]; then 
+			echo -e "                AssignUserID $NAME $NAME" >> $VHOSTAPACHE
+		fi		
 		echo -e "                AssignUserID $NAME $NAME" >> $VHOSTAPACHE
         echo -e "                <FilesMatch \"\.(cgi|shtml|phtml|php)$\">" >> $VHOSTAPACHE
         echo -e "                                SSLOptions +StdEnvVars" >> $VHOSTAPACHE
@@ -70,8 +73,7 @@ init() {
 			echo -e "\e[96m[ $DATELOG ]\e[39m Please run as root \e[91mAborting."
 			exit
 		fi
-		light_red='\e[1;91m%s\e[0m\n'                     
-		light_green='\e[1;92m%s\e[0m\n'                   
+        # Check DNS / Connexion working for download befor running.        
 		testping = `ping -c 2 -q wordpress.com`
 		if [ "$testping" -eq 0 ]; then                           
 		  echo -e "\e[1;92m%s\e[0m\n [ CONNECTION AVAILABLE ]" >&2; 
@@ -105,17 +107,20 @@ init() {
 				/etc/init.d/apache2 reload
 				echo -e "\e[96m[ $DATELOG ]\e[39m Self Signed SSL 443 \e[92m Actived"
 		fi
-		check_ssl=`apachectl -M | grep itk  | wc -l`		
-		if [ "$check_ssl" -eq 0 ]; then
+		check_itk=`apachectl -M | grep itk  | wc -l`		
+		if [ "$check_itk" -eq 0 ]; then
 				echo -e "\e[96m[ $DATELOG ]\e[39m Mode ITK is not actived, let me active... \e[93m Wait"
 				echo -e "\e[96m[ $DATELOG ]\e[39m ITK  \e[93m Wait"
 				a2enmod mpm_itk
 				/etc/init.d/apache2 reload
 				echo -e "\e[96m[ $DATELOG ]\e[39m ITK \e[92m Actived"
-				check_ssl=`apachectl -M | grep itk  | wc -l`
-				if [ "$check_ssl" -eq 0 ]; then
-					echo -e "[ $DATELOG ]\e[39m ITK Its require  but it's not installed.  \e[91mAborting." >&2;
-					exit 1;
+				check_itk=`apachectl -M | grep itk  | wc -l`
+				if [ "$check_itk" -eq 0 ]; then
+					apachemultiuser="0"
+					echo -e "\e[96m[ $DATELOG ]\e[39m ITK not found, not work multiuser apache. \e[93m Warrning"
+				else
+					apachemultiuser="0"
+					echo -e "\e[96m[ $DATELOG ]\e[39m ITK \e[92m Actived"
 				fi
 		fi		
         command -v mysql >/dev/null 2>&1 || { echo -e "[ $DATELOG ] I require mysql it's not installed.  \e[91mAborting." >&2; exit 1; }
@@ -320,17 +325,26 @@ provdir() {
         DIRECTORYWEB="$ROOTWWW/$NAME"
         echo -e "\e[96m[ $DATELOG ]\e[39m Provisioning directory for website \e[32m Wait" $RETURNSCREEN
         if [ ! -d "$DIRECTORYWEB" ] ; then
-                useradd -s /bin/bash -m -d /home/$NAME $NAME
-				usermod -a -G $NAME www-data
+				if [ ${apachemultiuser} -eq 1 ]; then 
+					useradd -s /bin/bash -m -d $DIRECTORYWEB $NAME
+					usermod -a -G $NAME www-data
+				fi
 				mkdir "$DIRECTORYWEB" ;
                 mkdir -m o-rwx "$DIRECTORYWEB/web";
                 mkdir -m o-rwx "$DIRECTORYWEB/log";
                 mkdir -m o-rwx "$DIRECTORYWEB/backup";
                 chmod +755 -R $DIRECTORYWEB/backup
-                chown -R $NAME. $DIRECTORYWEB/web
-                chown -R $NAME. $DIRECTORYWEB/log
-				FTPPASS=`tr -cd '[:alnum:]' < /dev/urandom | fold -w14 | head -n1`
-				echo -e "$FTPPASS\n$FTPPASS" | (passwd ${NAME})
+				if [ ${apachemultiuser} -eq 1 ]; then 
+					chown -R $NAME. $DIRECTORYWEB/web
+					chown -R $NAME. $DIRECTORYWEB/log
+					FTPPASS=`tr -cd '[:alnum:]' < /dev/urandom | fold -w14 | head -n1`
+					echo -e "$FTPPASS\n$FTPPASS" | (passwd ${NAME})				
+				else 
+					chown -R www-data. $DIRECTORYWEB/web
+					chown -R www-data. $DIRECTORYWEB/log
+				
+				fi
+
                 find $DIRECTORYWEB/web -type f -exec chmod 644 {} +
                 find $DIRECTORYWEB/web -type d -exec chmod 755 {} +
         echo -e "\e[96m[ $DATELOG ]\e[39m Directory for website \e[92m Created" $RETURNSCREEN				
@@ -442,9 +456,16 @@ fixpermwp() {
 	echo -e "\e[96m[ $DATELOG ]\e[39m Check Permissions WP \e[32m Wait" $RETURNSCREEN
 	DIRECTORYWEB="$ROOTWWW/$NAME/web"
 	cd $DIRECTORYWEB
-	WP_ROOT=`echo $DIRECTORYWEB`  # &lt;-- wordpress root directory
-	WS_GROUP=`echo $NAME` # &lt;-- webserver group
-	WP_OWNER=`echo $NAME` # &lt;-- wordpress owner
+	if [ ${apachemultiuser} == 1 ]; then 
+		WP_ROOT=`echo $DIRECTORYWEB`  # &lt;-- wordpress root directory
+		WS_GROUP=`echo $NAME` # &lt;-- webserver group
+		WP_OWNER=`echo $NAME` # &lt;-- wordpress owner			
+	else 
+		WP_ROOT=`echo $DIRECTORYWEB`  # &lt;-- wordpress root directory
+		WS_GROUP="www-data" # &lt;-- webserver group
+		WP_OWNER="www-data" # &lt;-- wordpress owner	
+	fi
+	
 	#I add this condition because if the folder does not exist, you completely block your system until you can no longer start.! 
 	#I wanted to share the experience with you because I had the case with a cron job which blocked a system because the folder no longer existed ....
 	if [ ! -d ${WP_ROOT} ]; then 
