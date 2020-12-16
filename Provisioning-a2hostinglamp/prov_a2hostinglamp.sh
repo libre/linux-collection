@@ -9,7 +9,7 @@
 
 PROGNAME=`basename $0`
 PROGPATH=`echo $0 | /bin/sed -e 's,[\\/][^\\/][^\\/]*$,,'`
-REVISION=`echo '$Revision: 1.0 $' | sed -e 's/[^0-9.]//g'`
+REVISION=`echo '$Revision: 1.3 $' | sed -e 's/[^0-9.]//g'`
 AUTHOR="https://github.com/libre"
 ROOTWWW="/var/www"
 TMPROOT="/var/tmp"
