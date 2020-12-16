@@ -73,15 +73,15 @@ init() {
 			echo -e "\e[96m[ $DATELOG ]\e[39m Please run as root \e[91mAborting."
 			exit
 		fi
-        # Check DNS / Connexion working for download befor running.        
-		testping=`ping -c 2 -q wordpress.com`
-		if [ "$testping" == 0 ]; then                           
-		  echo -e "\e[1;92m%s\e[0m\n [ CONNECTION AVAILABLE ]" >&2; 
-		else                                              
-		  echo -e "\e[96m[ $DATELOG ]\e[1;91m%s\e[0m\n DNS Or network not work \e[91mAborting." >&2; 
-		  exit 1;		  
-		fi
-        # Check command exist.
+        # Check DNS / Connexion working for download befor running.
+		testping=`echo -e "GET http://wordpress.com HTTP/1.0\n\n" | nc wordpress.com 80 > /dev/null 2>&1`
+		if [ $testping -eq 0 ]; then
+			echo -e "\e[1;92m%s\e[0m\n [ CONNECTION AVAILABLE ]" >&2; 
+		else
+			echo -e "\e[96m[ $DATELOG ]\e[1;91m%s\e[0m\n DNS Or network not work \e[91m Aborting." >&2; 
+			exit 1;	
+		fi        
+		# Check command exist.
         command -v apache2 >/dev/null 2>&1 || { echo -e "\e[96m[ $DATELOG ]\e[39m I require apache2 but it's not installed.  \e[91mAborting." >&2; exit 1; }
         command -v a2ensite >/dev/null 2>&1 || { echo -e "\e[96m[ $DATELOG ]\e[39m I require a2ensite but it's not installed.  \e[91mAborting." >&2; exit 1; }
         command -v apachectl >/dev/null 2>&1 || { echo -e "\e[96m[ $DATELOG ]\e[39m I require apachectl but it's not installed.  \e[91mAborting." >&2; exit 1; }
