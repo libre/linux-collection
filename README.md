@@ -2,6 +2,11 @@
 SaaS Manager by Shell Lamp is a provisioning script intended for development use. 
 It allows to deploy a Web space, DB and Wordpress in a few seconds and completely automatic.
 
+## Screenshot 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/libre/saasweb-by-shell/main/saasmanager01.PNG" width="450" title="Screenshot">
+</p>
+
 ## Functional 
 - Backup Management
 - Manage Vhosts
@@ -41,7 +46,8 @@ chmod +x *
 cp * /usr/local/bin/
 ```
 
-## Usage
+
+## Usage saasprovisioning.sh
 
 ```
 Usage: saasprovisioning.sh -domain exemple.com -name exemple -db yes -wordpress full -debug 0
@@ -61,6 +67,42 @@ Usage: saasprovisioning.sh --help
 
 If you specify the Wordpress option, you do not need to provide the db option. It will be created automatically.
 The Full version, includes Jetpack and several plugins essential for security, statistics and performance. Also, the full function includes several bootstrap theme selections.
+
+## Usage saasbackup.sh
+```
+Usage: saasbackup.sh [-name myweb] [-dbname mywebdb ] [-dbuser userdb ] [-dbpass userpass ]
+          -name (folder root of website (not folder webroot, folder root of user
+                        -dbname NAMEDATABASE, is specified backup db job.
+                        -dbuser USERDB, is specified backup db job.
+                        -dbpass PASSDB, is specified backup db job.
+
+Usage: saasbackup.sh --help
+Usage: saasbackup.sh --version
+```
+
+## Usage saasrestore.sh
+```
+Usage: saasrestore.sh [-action backup|restore] [-restorefile /mnt/mybackup/backup.tar.gz]
+          -backupname backup name file (not include WEBROOT or Extention (tar.gz)
+                        ex: file is WEBROOT.MYWEBSITE.123120190456.tar.gz use name of backup : MYWEBSITE.123120190456
+                        -dbname NAMEDATABASE, is specified backup db job.
+                        -dbuser USERDB, is specified backup db job. **
+                        -dbpass PASSDB, is specified backup db job. **
+          ** (required only for restore DB)
+
+Usage: saasrestore.sh --help
+Usage: saasrestore.sh --version
+
+```
+## Usage saasbackuprotation.sh
+```
+Usage: saasbackuprotation [-name myweb] [-rotation 7 ] [-delete yes ]
+  -name (folder root of website (not folder webroot, folder root of user)
+  -rotation number of last backup
+  -delete yes not specified, only simulation ! NOT DELETED.
+
+ ex: saasbackuprotation -name myweb -rotation 7 -delete yes
+```
 
 
 ## Contributing
