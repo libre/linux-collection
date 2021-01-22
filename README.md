@@ -1,13 +1,21 @@
-# A2hostinglamp.sh
-A2 Hosting Lamp is a provisioning script intended for development use. It allows to deploy a Web space, DB and Wordpress in a few seconds and completely automatic.
+# SaaS Manager by Shell.sh
+SaaS Manager by Shell Lamp is a provisioning script intended for development use. 
+It allows to deploy a Web space, DB and Wordpress in a few seconds and completely automatic.
+
+## Functional 
+- Backup Management
+- Manage Vhosts
+- Userspace separation Apache2 ITK
+- Creating Host, user, ftp, db and Wordpress install. 
 
 ## Functional dependencies
 
 - OS: Ubuntu LTS / Debian
-  - Webservice Apache2 + Modules : SSL, HEADERS, REWRITE 
+  - Webservice Apache2 + Modules : SSL, HEADERS, REWRITE, ITK
   - PHP 7.X : Mod PHP or FPM
   - wp-cli
   - curl
+  - vsftpd
   - sendmail
   - mariadb (Mysql).
 
@@ -27,16 +35,16 @@ So just download the script and make it executable. It is necessary to have root
  
 ```
 cd /usr/src/
-curl "https://raw.githubusercontent.com/libre/linux-collection/Provisioning-a2hostinglamp/prov_a2hostinglamp.sh"
-cp prov_a2hostinglamp.sh /usr/local/sbin
-chown +x /usr/local/sbin/prov_a2hostinglamp.sh
+git clone https://github.com/libre/saasweb-by-shell.git
+cd saasweb-by-shell/saasmanager/
+chmod +x *
+cp * /usr/local/bin/
 ```
 
 ## Usage
 
-
 ```
-Usage: prov_a2hostinglamp.sh -domain exemple.com -name exemple -db yes -wordpress full -debug 0
+Usage: saasprovisioning.sh -domain exemple.com -name exemple -db yes -wordpress full -debug 0
 -domain exemple.com or www.exemple.com
 -name exemple not use dot or special charts
 -db yes|no (default no) creating user/db for website
@@ -48,7 +56,7 @@ minimalexemple : Wordpress minimal and content exemple
 full : Wordpress fullinstall and jetpack
 fullexemple : Wordpress fullinstall/jetpack and content exemple
 
-Usage: prov_a2hostinglamp.sh --help
+Usage: saasprovisioning.sh --help
 ```
 
 If you specify the Wordpress option, you do not need to provide the db option. It will be created automatically.
