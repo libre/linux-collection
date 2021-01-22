@@ -43,7 +43,7 @@ cd /usr/src/
 git clone https://github.com/libre/saasweb-by-shell.git
 cd saasweb-by-shell/saasmanager/
 chmod +x *
-cp * /usr/local/bin/
+cp * /usr/local/sbin/
 ```
 
 
