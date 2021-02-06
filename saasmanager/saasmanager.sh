@@ -142,7 +142,7 @@ soft() {
                 # First List Backup
                 COUNTER=1
                 RADIOLIST=""  # variable where we will keep the list entries for radiolist dialog
-                for i in $WEBROOT/; do
+                for i in $WEBROOT/*; do
                                 RADIOLIST="$RADIOLIST $i off "
                                 let COUNTER=COUNTER+1
                 done
@@ -171,7 +171,7 @@ soft() {
                 # First List Backup
                 COUNTER=1
                 RADIOLIST=""  # variable where we will keep the list entries for radiolist dialog
-                for i in $WEBROOT/; do
+                for i in $WEBROOT/*; do
                                 RADIOLIST="$RADIOLIST $i off "
                                 let COUNTER=COUNTER+1
                 done
@@ -211,7 +211,7 @@ soft() {
                 # First List Backup
                 COUNTER=1
                 RADIOLIST=""  # variable where we will keep the list entries for radiolist dialog
-                for i in $WEBROOT/; do
+                for i in $WEBROOT/*; do
                                 RADIOLIST="$RADIOLIST $i off "
                                 let COUNTER=COUNTER+1
                 done
@@ -233,7 +233,7 @@ soft() {
                 # First List Backup
                 COUNTER=1
                 RADIOLIST=""  # variable where we will keep the list entries for radiolist dialog
-                for i in $WEBROOT/; do
+                for i in $WEBROOT/*; do
                                 RADIOLIST="$RADIOLIST $i off "
                                 let COUNTER=COUNTER+1
                 done
